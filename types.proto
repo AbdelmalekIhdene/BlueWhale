@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+enum BenchmarkType {
+  DVDSTORE = 0;
+  NDBENCH = 1;
+}
+
+enum WorkloadMetric {
+  CPU = 0;
+  NETWORK_IN = 1;
+  NETWORK_OUT = 2;
+  MEMORY = 3;
+}
+
+enum DataType {
+  TRAINING = 0;
+  TESTING = 1;
+}
+
+enum AnalyticsType {
+  T10P = 0;
+  T50P = 1;
+  T95P = 2;
+  T99P = 3;
+  AVG = 4;
+  STD = 5;
+  MAX = 6;
+  MIN = 7;
+}
+
+message RFW {
+  int32 Id = 1;
+  BenchmarkType benchmarkType = 2;
+  WorkloadMetric workloadMetric = 3;
+  int32 sampleCount = 4;
+  int32 batchId = 5;
+  int32 batchCount = 6;
+  DataType dataType = 7;
+  AnalyticsType analyticsType = 8;
+}
+
+message RFD {
+  int32 Id = 1;
+  int32 lastBatchId = 2;
+  repeated double samples = 3 [packed=true];
+  double analyticsValue = 4;
+}
