@@ -72,9 +72,10 @@ def generateRFD(RFW):
     series = NDBENCH_TESTING
   serie = series[RFW.workloadMetric]
 
-  # TO-DO: Work on validating the boundaries of the series
-  startingOffset = RFW.batchId * RFW.sampleCount
+  startingOffset = (RFW.batchId - 1) * RFW.sampleCount
   totalSampleCount = RFW.batchCount * RFW.sampleCount
+  endingOffset = startingOffset+totalSampleCount-1
+
   samples = serie[startingOffset:startingOffset+totalSampleCount]
   RFD.samples.extend(samples)
   RFD.analyticsValue = calculateAnalytics(samples, totalSampleCount, RFW.analyticsType)
@@ -91,10 +92,15 @@ def index():
     data = request.get_data()
     RFW = pbtypes.RFW()
     RFW.ParseFromString(data)
-  RFD = generateRFD(RFW)
+  try:
+    RFD = generateRFD(RFW)
+  except IndexError:
+    response = Response("Accessing out-of-bound dataset indexes")
+    response.status = 500
+    return response
   response = Response(MessageToJson(RFD, including_default_value_fields=True) if isJSON else RFD.SerializeToString())
   response.headers["Content-Type"] = request.mimetype
   response.status = 200
   return response
 
-app.run(host='127.0.0.1', port=8080)
+app.run(host='0.0.0.0', port=8080)

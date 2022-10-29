@@ -1,20 +1,22 @@
+import os
 import pyinputplus as pyip
 import requests
 from google.protobuf.json_format import MessageToJson
 from google.protobuf.json_format import Parse as JSONParse
+from decouple import config
 
 import types_pb2 as pbtypes
 
-print("//////////////////////////////////////////////////////")
+print("///////////////////////////////////////////////////////////////")
 print("Welcome to the RFW Request Generator & Client [RFWRGC]")
-print("By Abdelmalek Ihdene & Jonathan Perlman.")
-print("//////////////////////////////////////////////////////")
+print("By Abdelmalek Ihdene & Jonathan Perlman & Nithujan Tharmalingam")
+print("///////////////////////////////////////////////////////////////")
 print("The client will:")
 print("1. Prompt the user with a set of inquiries.")
 print("2. Generate an HTTP request from the resulting answers.")
 print("3. Send that request over to the server.")
 print("4. Display the resulting RFD payload.")
-print("//////////////////////////////////////////////////////")
+print("///////////////////////////////////////////////////////////////")
 
 def inputMenuWrapper(prompt, enum):
   return pyip.inputMenu(prompt=prompt, choices=enum.keys())
@@ -37,8 +39,9 @@ headers = {
   "Content-Type": "application/json" if isDataJSON else "application/x-protobuf" 
 }
 RFD = None
-response = requests.post(url="http://127.0.0.1:8080/", data=data, headers=headers)
-print("\nReceived response [" + str(response.status_code) + "] back...")
+print("\nPosting to server: " + config("SERVER_URL"))
+response = requests.post(url=config("SERVER_URL"), data=data, headers=headers)
+print("Received response [" + str(response.status_code) + "] back...")
 
 if response.status_code == 200:
   print("Response content:\n" + str(response.content))
@@ -55,3 +58,5 @@ if response.status_code == 200:
   print("Last batch ID: " + str(RFD.lastBatchId))
   print("Samples: " + str(RFD.samples))
   print("Analytics: " + str(RFD.analyticsValue))
+elif response.status_code == 500:
+  print("Response error:\n" + str(response.content.decode()))
