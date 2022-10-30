@@ -1,5 +1,5 @@
 @ECHO OFF
-title test
+title Client
 @ECHO ON
 "client.exe"
 pause
