@@ -6,7 +6,6 @@ import statistics
 import types_pb2 as pbtypes
 
 class serverTest(unittest.TestCase):
-
     def test_loadCSVDataset_withDVDtrainingCSV(self):
         dataset = server.loadCSVDataset("DVD-training.csv")
         self.assertEqual(len(dataset), 4)
@@ -31,6 +30,35 @@ class serverTest(unittest.TestCase):
         self.assertEqual(server.calculateAnalytics(testSamples, len(testSamples), pbtypes.AnalyticsType.STD), statistics.stdev(testSamples))
         self.assertEqual(server.calculateAnalytics(testSamples, len(testSamples), pbtypes.AnalyticsType.MAX), 10)
         self.assertEqual(server.calculateAnalytics(testSamples, len(testSamples), pbtypes.AnalyticsType.MIN), 0)
+
+    def test_generateRFD(self):
+        request = pbtypes.RFW()
+        request.Id = 3
+        request.benchmarkType = pbtypes.BenchmarkType.DVDSTORE
+        request.workloadMetric = pbtypes.WorkloadMetric.CPU
+        request.sampleCount = 3
+        request.batchId = 3
+        request.batchCount = 3 
+        request.dataType = pbtypes.DataType.TRAINING
+        request.analyticsType = pbtypes.AnalyticsType.T10P
+        RFD = server.generateRFD(request)
+        self.assertEqual(RFD.Id, 3)
+        self.assertEqual(RFD.lastBatchId, 5)
+        self.assertEqual(RFD.samples, [30.0, 31.0, 35.0, 40.0, 46.0, 51.0, 55.0, 55.0, 52.0])
+        self.assertEqual(RFD.analyticsValue, 30.8)
+    
+    def test_generateRFD_outOfBound(self):
+        request = pbtypes.RFW()
+        request.Id = 3
+        request.benchmarkType = pbtypes.BenchmarkType.DVDSTORE
+        request.workloadMetric = pbtypes.WorkloadMetric.CPU
+        request.sampleCount = 10
+        request.batchId = 15672
+        request.batchCount = 10 
+        request.dataType = pbtypes.DataType.TRAINING
+        request.analyticsType = pbtypes.AnalyticsType.T10P
+        with self.assertRaises(IndexError):
+            RFD = server.generateRFD(request)
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
