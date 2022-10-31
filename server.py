@@ -50,7 +50,7 @@ def calculateAnalytics(samples, totalSampleCount, analyticsType):
   elif analyticsType == pbtypes.AnalyticsType.AVG:
     return average
   elif analyticsType == pbtypes.AnalyticsType.STD:
-    return statistics.stdev(sample)
+    return statistics.stdev(samples)
   elif analyticsType == pbtypes.AnalyticsType.MAX:
     return max
   elif analyticsType == pbtypes.AnalyticsType.MIN:
